@@ -1,0 +1,14 @@
+name = "co-decomp"
+version = "0.0.1"
+license = "MIT"
+maintainer = "limpid.mazarine@gmail.com"
+keywords = ["coarray", "Fortran"]
+author = "Han Tang"
+
+[library]
+source-dir = "src"
+
+[[test]]
+name = "test"
+source-dir = "test"
+main = "test.f90"
