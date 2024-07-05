@@ -1,13 +1,13 @@
-# Welcome to co-decomp
-Co-decomp is a coarray decomposition/forward partition tool.
+# CoDecomp
+CoDecomp is a coarray domain decomposition toolkit.
 
-## Compile and test
-Compile and test with OpenCoarrays (built with OpenMPI),
+## Compile and test with FPM
+Compile and test by OpenCoarrays (built with OpenMPI), for example, with 8 images,
 ```bash
 fpm test --compiler caf --runner "cafrun -n 8 --use-hwthread-cpus"
 ```
 
-## Example
+## Quick Start
 ```fortran
 program main
   use, non_intrinsic :: module_decomposition
@@ -22,3 +22,6 @@ program main
   if (this_image() == 1) print *, decomp
 end program main
 ```
+
+## Miscellaneous
+The icon of this library is inspired by Piet Mondrian's [Composition II in Red, Blue, and Yellow](https://en.wikipedia.org/wiki/Piet_Mondrian#/media/File:Piet_Mondriaan,_1930_-_Mondrian_Composition_II_in_Red,_Blue,_and_Yellow.jpg).

@@ -1,6 +1,6 @@
 # Application Programming Interfaces
 
-## `SIZE` -- Determine the size of a decomposition type
+## `SIZE`
 ### Description
 __PURE FUNCTION.__ Determine the size of a `decomposition_type` along a specified dimension _DIM_ and an option _OPT_. If _DIM_ is present, the size along the specified dimension is returned. The default _DIM_ is zero, and the product of shape will be returned. The _OPT_ shall be one of the "local", "global" or "local_max". The default _OPT_ is "local".
 
@@ -12,7 +12,7 @@ decomp_size = SIZE(decomp[, dim[, opt]])
 ### Arguments
 | Name   | Type & Kind | Attribute |
 |:-------|:------------|:---------|
-| decomp |`class(decomposition_type)`|`intent(in)` |
+| decomp | `class(decomposition_type)` | `intent(in)` |
 | dim    | `integer` | `intent(in), optional` |
 | opt    | `character(len=*)` | `intent(in), optional` |
 
@@ -39,7 +39,7 @@ program main
 end program main
 ```
 
-## `SHAPE` -- Determine the shape of a decomposition type
+## `SHAPE`
 ### Description
 __PURE FUNCTION.__ Determine the shape of a decomposition type.
 
@@ -51,7 +51,7 @@ decomp_size = SHAPE(decomp[, opt])
 ### Arguments
 | Name   | Type & Kind | Attribute |
 |:-------|:------------|:---------|
-| decomp |`class(decomposition_type)`|`intent(in)` |
+| decomp | `class(decomposition_type)` | `intent(in)` |
 | opt    | `character(len=*)` | `intent(in), optional` |
 
 ### Return value
@@ -73,19 +73,19 @@ program main
 end program main
 ```
 
-## `THIS_IMAGE` -- Function that returns the cosubscript index of a decomposition type
+## `THIS_IMAGE`
 ### Description
-__THIS_IMAGE.__ Returns the cosubscript for this decomposition type.
+__PURE FUNCTION.__ Returns the cosubscript for this decomposition type.
 
 ### Syntax
 ```
-image = THIS_IMAGE(decomp[, dim])
+result = THIS_IMAGE(decomp[, dim])
 ```
 
 ### Arguments
 | Name   | Type & Kind | Attribute |
 |:-------|:------------|:---------|
-| decomp |`class(decomposition_type)`|`intent(in)` |
+| decomp | `class(decomposition_type)` | `intent(in)` |
 | dim    | `integer` | `intent(in), optional` |
 
 ### Return value
@@ -106,3 +106,20 @@ program main
   if (this_image() == 1) print "(*(i0, 1x))", THIS_IMAGE(decomp) ! 1
 end program main
 ```
+
+## `COSHAPE`
+### Description
+__PURE FUNCTION.__ Returns the sizes of codimensions of a decomposition type.
+
+### Syntax
+```
+result = COSHAPE(decomp)
+```
+
+### Arguments
+| Name   | Type & Kind | Attribute |
+|:-------|:------------|:---------|
+| decomp | `class(decomposition_type)` | `intent(in)` |
+
+### Return value
+An `INTEGER` array that is `decomp%num_procs`.
