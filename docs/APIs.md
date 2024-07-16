@@ -1,4 +1,28 @@
-# Application Programming Interfaces
+# APIs
+
+## `DECOMPOSE`
+### Description
+__PURE SUBROUTINE.__ Domain decomposition tool. If manual decomposition is used, both `num_tasks` and `num_procs` must present, and the size of the two shall be the same. If automatic decomposition is applied, then we need at least the total number of tasks. The subroutine will try to decompose images into combinations that are as close as possible to each other. For example, if 12 images is decomposed into a rank-2 decomposition, the result would be 4x3.
+
+### Syntax
+```
+call DECOMPOSE(decomp, num_tasks, num_procs)
+call DECOMPOSE(decomp, num_tasks[, num_ranks[, num_procs]])
+```
+
+### Arguments
+| Name   | Type & Kind | Attribute |
+|:-------|:------------|:---------|
+| decomp | `class(decomposition_type)` | `intent(out)` |
+| num_tasks | `integer` | `dimension(:), intent(in)` |
+| num_procs | `integer` | `dimension(:), intent(in)` |
+
+| Name   | Type & Kind | Attribute |
+|:-------|:------------|:---------|
+| decomp | `class(decomposition_type)` | `intent(out)` |
+| num_tasks | `integer` | `integer(in)` |
+| num_ranks | `integer` | `optional, intent(in)` |
+| num_procs | `integer` | `optional, intent(in)` |
 
 ## `SIZE`
 ### Description
@@ -72,6 +96,37 @@ program main
   if (this_image() == 1) print "(*(i0, 1x))", SHAPE(decomp) ! 48 32
 end program main
 ```
+
+## `BASE_INDEX`
+### Description
+__PURE FUNCTION.__ Returns the global base index of the current image.
+
+### Syntax
+```
+result = BASE_INDEX(decomp)
+```
+
+### Arguments
+| Name   | Type & Kind | Attribute |
+|:-------|:------------|:---------|
+| decomp | `class(decomposition_type)` | `intent(in)` |
+
+### Return value
+An `INTEGER` array that is `decomp%base_index`.
+
+## `REMAINDER`
+### Description
+__PURE FUNCTION.__ Returns the remainder of the current image. Zero if domain decomposition is balanced. Otherwise, a nonzer value of `decomp%remainder` is returned.
+
+### Syntax
+```
+result = REMAINDER(decomp)
+```
+
+### Arguments
+| Name   | Type & Kind | Attribute |
+|:-------|:------------|:---------|
+| decomp | `class(decomposition_type)` | `intent(in)` |
 
 ## `THIS_IMAGE`
 ### Description

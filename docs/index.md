@@ -1,4 +1,4 @@
-# CoDecomp
+# Introduction
 CoDecomp is a coarray domain decomposition toolkit.
 
 ## Compile and test with FPM
@@ -24,4 +24,4 @@ end program main
 ```
 
 ## Miscellaneous
-The icon of this library is inspired by Piet Mondrian's [Composition II in Red, Blue, and Yellow](https://en.wikipedia.org/wiki/Piet_Mondrian#/media/File:Piet_Mondriaan,_1930_-_Mondrian_Composition_II_in_Red,_Blue,_and_Yellow.jpg).
+The icon of this library is inspired by the well-known painting, Composition II in Red, Blue, and Yellow by [Piet Mondrian](https://en.wikipedia.org/wiki/Piet_Mondrian#).
