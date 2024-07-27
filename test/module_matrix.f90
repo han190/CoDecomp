@@ -49,7 +49,7 @@ function transpose_matrix(matrix) result(transposed)
   type(matrix_type) :: transposed
   integer, allocatable :: buffer(:,:)[:]
   integer :: global_size(2), local_size(2), local_size_max(2)
-  integer :: num_procs(2), this_proc(2)
+  integer :: num_procs(2)!, this_proc(2)
 
   !> Transpose local image
   global_size = shape(matrix, opt="global")
