@@ -27,7 +27,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     if(CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 2024.1.0)
       message(FATAL_ERROR "ifx < 2024.1.0")
     endif()
-    print_compiler(${CMAKE_Fortran_COMPILER} 
+    print_compiler(${CMAKE_Fortran_COMPILER_ID} 
       ${CMAKE_Fortran_COMPILER_VERSION})
 
     if(NOT COARRAY_TYPE)
