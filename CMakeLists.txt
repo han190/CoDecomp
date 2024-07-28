@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(CODECOMP VERSION 0.0.1 LANGUAGES Fortran
   DESCRIPTION "Coarray Decomposition Library"
-  HOMEPAGE_URL https://github.com/han190/co-decomp)
+  HOMEPAGE_URL https://github.com/han190/CoDecomp)
 
 # Set default CMAKE_BUILD_TYPE.
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -10,15 +10,31 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
 endif()
 
-# Set number of images
+# Set NUM_IMAGES
 if(NOT NUM_IMAGES)
   include(ProcessorCount)
   ProcessorCount(NUM_IMAGES)
   message(STATUS "Number of images: ${NUM_IMAGES}")
 endif()
 
-function(print_compiler compiler compiler_version)
-  message(STATUS "Compiler: ${compiler} ${compiler_version}")
+# Set COARRAY_TYPE (it is either "shared" or "distributed")
+if(NOT COARRAY_TYPE)
+  set(COARRAY_TYPE shared)
+  message(STATUS "Coarray type: ${COARRAY_TYPE}")
+else()
+  if(NOT (${COARRAY_TYPE} STREQUAL "shared" OR
+    ${COARRAY_TYPE} STREQUAL "distributed"))
+    message(FATAL_ERROR "Invalid coarray type: ${COARRAY_TYPE}")
+  endif()
+endif()
+
+# Print compiler ID and version
+function(print_compiler)
+  set(fcid ${CMAKE_Fortran_COMPILER_ID})
+  set(fcver ${CMAKE_Fortran_COMPILER_VERSION})
+  set(fcpath ${CMAKE_Fortran_COMPILER})
+  cmake_path(GET fcpath FILENAME fcname)
+  message(STATUS "Compiler: ${fcid} ${fcver} (${fcname})")
 endfunction()
 
 # Choose OS, compiler and compiler flags
@@ -27,27 +43,14 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     if(CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 2024.1.0)
       message(FATAL_ERROR "ifx < 2024.1.0")
     endif()
-    print_compiler(${CMAKE_Fortran_COMPILER_ID} 
-      ${CMAKE_Fortran_COMPILER_VERSION})
-
-    if(NOT COARRAY_TYPE)
-      set(COARRAY_TYPE shared)
-      message(STATUS "Coarray type: ${COARRAY_TYPE}")
-    endif()
-
-    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-      set(CMAKE_Fortran_FLAGS "/Qcoarray:${COARRAY_TYPE} \
-        /Qcoarray-num-images:${NUM_IMAGES} /nologo /QxHost \
-        /debug:full /traceback /warn:all /check:all /standard-semantics")
-    elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-      set(CMAKE_Fortran_FLAGS "/Qcoarray:${COARRAY_TYPE} \
-        /Qcoarray-num-images:${NUM_IMAGES} /nologo /QxHost /O2")
-    else()
-      message(FATAL_ERROR "Invalid CMAKE_BUILD_TYPE.")
-    endif()
+    print_compiler()
+    set(IFX_FLAGS /nologo)
+    set(COARRAY_FLAGS /Qcoarray:${COARRAY_TYPE} 
+      /Qcoarray-num-images:${NUM_IMAGES})
+    add_compile_options("${COARRAY_FLAGS}" "${IFX_FLAGS}")
     message(STATUS "Profile: ${CMAKE_BUILD_TYPE}")
   elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "Intel")
-    message(FATAL_ERROR "Deprecated compiler.")
+    message(FATAL_ERROR "ifort is deprecated.")
   endif()
 endif()
 
