@@ -3,23 +3,23 @@ implicit none
 contains
 
 !> Compute remainder
-impure elemental function compute_r(n, p) result(r)
+impure elemental function get_remainder(n, p) result(r)
   integer, intent(in) :: n, p
   integer :: r
 
   r = mod(n, p)
-end function compute_r
+end function get_remainder
 
 !> Compute maximum local size
-impure elemental function compute_m(n, p) result(m)
+impure elemental function get_maxlocalsize(n, p) result(m)
   integer, intent(in) :: n, p
   integer :: m
 
   m = (n - 1) / p + 1
-end function compute_m
+end function get_maxlocalsize
 
 !> Compute local size
-impure elemental function compute_m_alpha(r, alpha, m) result(m_alpha)
+impure elemental function get_localsize(r, alpha, m) result(m_alpha)
   integer, intent(in) :: r, alpha, m
   integer :: m_alpha
 
@@ -33,10 +33,10 @@ impure elemental function compute_m_alpha(r, alpha, m) result(m_alpha)
   else
     m_alpha = m - 1
   end if
-end function compute_m_alpha
+end function get_localsize
 
 !> Compute co-index
-impure elemental function compute_alpha(r, m, k) result(alpha)
+impure elemental function get_coindex(r, m, k) result(alpha)
   integer, intent(in) :: r, m, k
   integer :: alpha
 
@@ -50,10 +50,10 @@ impure elemental function compute_alpha(r, m, k) result(alpha)
   else
     alpha = (k - r - 1) / (m - 1) + 1
   end if
-end function compute_alpha
+end function get_coindex
 
 !> Compute base index
-impure elemental function compute_k0_alpha(r, alpha, m_alpha) result(k0_alpha)
+impure elemental function get_baseindex(r, alpha, m_alpha) result(k0_alpha)
   integer, intent(in) :: r, alpha, m_alpha
   integer :: k0_alpha
 
@@ -67,7 +67,7 @@ impure elemental function compute_k0_alpha(r, alpha, m_alpha) result(k0_alpha)
   else
     k0_alpha = (alpha - 1) * m_alpha + r
   end if
-end function compute_k0_alpha
+end function get_baseindex
 
 !> Decomposition type constructor
 module subroutine decompose_manual(decomp, num_tasks, num_procs)
@@ -78,11 +78,11 @@ module subroutine decompose_manual(decomp, num_tasks, num_procs)
   if (size(num_tasks) /= size(num_procs)) error stop &
     & "[decompose_manual] Invalid processors or size."
 
-  m = compute_m(num_tasks, num_procs)
-  r = compute_r(num_tasks, num_procs)
+  m = get_maxlocalsize(num_tasks, num_procs)
+  r = get_remainder(num_tasks, num_procs)
   alpha = convert(num_procs, this_image())
-  m_alpha = compute_m_alpha(r, alpha, m)
-  k0_alpha = compute_k0_alpha(r, alpha, m_alpha)
+  m_alpha = get_localsize(r, alpha, m)
+  k0_alpha = get_baseindex(r, alpha, m_alpha)
 
   decomp%num_ranks = size(num_tasks)
   decomp%global_size = num_tasks
@@ -117,10 +117,10 @@ module function get_location(decomp, global_index, recompute) result(local_index
     & m_alpha => decomp%local_size, &
     & k0 => decomp%base_index)
 
-  alpha = compute_alpha(r, m, k)
-  m_alpha = compute_m_alpha(r, alpha, m)
-  k0 = compute_k0_alpha(r, alpha, m_alpha)
-  local_index = k - k0
+    alpha = get_coindex(r, m, k)
+    m_alpha = get_localsize(r, alpha, m)
+    k0 = get_baseindex(r, alpha, m_alpha)
+    local_index = k - k0
   end associate
 end function get_location
 
