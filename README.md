@@ -1,10 +1,17 @@
 # co-decomp
 Coarray decomposition/forward partition tool
 
-## Compile and test
+## Compile
+### Fortran Package Manager (fpm)
 Compile and test with OpenCoarrays (built with OpenMPI),
 ```bash
+fpm build --compiler caf
 fpm test --compiler caf --runner "cafrun -n 8 --use-hwthread-cpus"
+```
+### CMake
+```bash
+mkdir build && cd build
+cmake .. -G "Ninja"
 ```
 
 ## Example
