@@ -70,21 +70,31 @@ impure elemental function get_baseindex(r, alpha, m_alpha) result(k0_alpha)
 end function get_baseindex
 
 !> Decomposition type constructor
-module subroutine decompose_manual(decomp, num_tasks, num_procs)
-  class(decomposition_type), intent(out) :: decomp
+module function decompose_manual(num_tasks, num_procs) result(decomp)
   integer, intent(in) :: num_tasks(:), num_procs(:)
+  type(decomposition_type(num_ranks=:)), allocatable :: decomp
   integer, dimension(size(num_tasks)) :: m, r, alpha, m_alpha, k0_alpha
+  integer :: n
 
-  if (size(num_tasks) /= size(num_procs)) error stop &
+  !> Runtime check
+  n = size(num_tasks)
+  if (n /= size(num_procs)) error stop &
     & "[decompose_manual] Invalid processors or size."
-
+  
+  !> Allocate decomp
+  if (.not. allocated(decomp)) then
+    allocate (decomposition_type(num_ranks=n) :: decomp)
+  else if (decomp%num_ranks /= n) then
+    deallocate (decomp)
+    allocate (decomposition_type(num_ranks=n) :: decomp)
+  end if
+  
   m = get_maxlocalsize(num_tasks, num_procs)
   r = get_remainder(num_tasks, num_procs)
   alpha = convert(num_procs, this_image())
   m_alpha = get_localsize(r, alpha, m)
   k0_alpha = get_baseindex(r, alpha, m_alpha)
 
-  decomp%num_ranks = size(num_tasks)
   decomp%global_size = num_tasks
   decomp%num_procs = num_procs
   decomp%local_size_max = m
@@ -92,11 +102,11 @@ module subroutine decompose_manual(decomp, num_tasks, num_procs)
   decomp%co_index = alpha
   decomp%local_size = m_alpha
   decomp%base_index = k0_alpha
-end subroutine decompose_manual
+end function decompose_manual
 
 !> Compute local index from global index.
 module function get_location(decomp, global_index, recompute) result(local_index)
-  class(decomposition_type), intent(inout) :: decomp
+  type(decomposition_type(num_ranks=*)), intent(inout) :: decomp
   integer, intent(in) :: global_index(:)
   logical, intent(in), optional :: recompute
   integer, allocatable :: local_index(:)
@@ -124,29 +134,29 @@ module function get_location(decomp, global_index, recompute) result(local_index
   end associate
 end function get_location
 
-!> Copy allocatable array
-pure function copy_allocatable(arr) result(ret)
-  integer, allocatable, intent(in) :: arr(:)
-  integer, allocatable :: ret(:)
+! !> Copy allocatable array
+! pure function copy_allocatable(arr) result(ret)
+!   integer, allocatable, intent(in) :: arr(:)
+!   integer, allocatable :: ret(:)
 
-  if (.not. allocated(arr)) error stop &
-    & "[copy_allocatable] Input array not allocated."
-  ret = arr
-end function copy_allocatable
+!   if (.not. allocated(arr)) error stop &
+!     & "[copy_allocatable] Input array not allocated."
+!   ret = arr
+! end function copy_allocatable
 
-!> Copy meta data
-module subroutine copy_decomp(from, to)
-  class(decomposition_type), intent(in) :: from
-  class(decomposition_type), intent(out) :: to
+! !> Copy meta data
+! module subroutine copy_decomp(from, to)
+!   class(decomposition_type), intent(in) :: from
+!   class(decomposition_type), intent(out) :: to
 
-  to%num_ranks = from%num_ranks
-  to%global_size = copy_allocatable(from%global_size)
-  to%num_procs = copy_allocatable(from%num_procs)
-  to%local_size_max = copy_allocatable(from%local_size_max)
-  to%local_size = copy_allocatable(from%local_size)
-  to%co_index = copy_allocatable(from%co_index)
-  to%remainder = copy_allocatable(from%remainder)
-  to%base_index = copy_allocatable(from%base_index)
-end subroutine copy_decomp
+!   to%num_ranks = from%num_ranks
+!   to%global_size = copy_allocatable(from%global_size)
+!   to%num_procs = copy_allocatable(from%num_procs)
+!   to%local_size_max = copy_allocatable(from%local_size_max)
+!   to%local_size = copy_allocatable(from%local_size)
+!   to%co_index = copy_allocatable(from%co_index)
+!   to%remainder = copy_allocatable(from%remainder)
+!   to%base_index = copy_allocatable(from%base_index)
+! end subroutine copy_decomp
 
 end submodule submodule_manual

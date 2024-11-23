@@ -6,32 +6,25 @@ implicit none
 public :: decomposition_type
 public :: decompose
 public :: write(formatted)
-public :: get_location
-public :: copy_decomp
-public :: size
-public :: shape
-public :: base_index
-public :: remainder
-public :: coshape
-public :: this_image
+public :: size, shape
+public :: coshape, this_image
 private
 
 !> Decomposition type
-type :: decomposition_type
-  integer :: num_ranks
-  integer, allocatable :: global_size(:)
-  integer, allocatable :: num_procs(:)
-  integer, allocatable :: local_size_max(:)
-  integer, allocatable :: local_size(:)
-  integer, allocatable :: co_index(:)
-  integer, allocatable :: remainder(:)
-  integer, allocatable :: base_index(:)
+type :: decomposition_type(num_ranks)
+  integer, len :: num_ranks
+  integer :: global_size(num_ranks)
+  integer :: num_procs(num_ranks)
+  integer :: local_size_max(num_ranks)
+  integer :: local_size(num_ranks)
+  integer :: co_index(num_ranks)
+  integer :: remainder(num_ranks)
+  integer :: base_index(num_ranks)
 end type decomposition_type
 
-!> Wrapper of decompose procedures
+!> Wrapper decompose
 interface decompose
   module procedure :: decompose_manual
-  module procedure :: decompose_auto
 end interface decompose
 
 !> UDDTIO for decomposition_type
@@ -61,35 +54,14 @@ end interface this_image
 
 interface
   !> Decomposition type constructor
-  module subroutine decompose_manual(decomp, num_tasks, num_procs)
-    class(decomposition_type), intent(out) :: decomp
+  module function decompose_manual(num_tasks, num_procs) result(decomp)
     integer, intent(in) :: num_tasks(:), num_procs(:)
-  end subroutine decompose_manual
-
-  !> Compute local index from global index.
-  module function get_location(decomp, global_index, recompute) result(local_index)
-    class(decomposition_type), intent(inout) :: decomp
-    integer, intent(in) :: global_index(:)
-    logical, intent(in), optional :: recompute
-    integer, allocatable :: local_index(:)
-  end function get_location
-
-  !> Copy metadata
-  module subroutine copy_decomp(from, to)
-    class(decomposition_type), intent(in) :: from
-    class(decomposition_type), intent(out) :: to
-  end subroutine copy_decomp
-
-  !> Automatically decompose tasks based on number of ranks provided.
-  module subroutine decompose_auto(decomp, num_tasks, num_ranks, num_procs)
-    class(decomposition_type), intent(out) :: decomp
-    integer, intent(in) :: num_tasks
-    integer, intent(in), optional :: num_ranks, num_procs
-  end subroutine decompose_auto
+    type(decomposition_type(num_ranks=:)), allocatable :: decomp
+  end function decompose_manual
 
   !> write(formatted)
   module subroutine write_formatted(dtv, unit, iotype, v_list, iostat, iomsg)
-    class(decomposition_type), intent(in) :: dtv
+    class(decomposition_type(num_ranks=*)), intent(in) :: dtv
     integer, intent(in) :: unit
     character(len=*), intent(in) :: iotype
     integer, intent(in) :: v_list (:)
@@ -97,9 +69,17 @@ interface
     character(len=*), intent(inout) :: iomsg
   end subroutine write_formatted
 
+  !> Compute local index from global index
+  module function get_location(decomp, global_index, recompute) result(local_index)
+    type(decomposition_type(num_ranks=*)), intent(inout) :: decomp
+    integer, intent(in) :: global_index(:)
+    logical, intent(in), optional :: recompute
+    integer, allocatable :: local_index(:)
+  end function get_location
+
   !> The "size" function for decomposition_type
   pure module function get_size(decomp, dim, opt) result(ret)
-    class(decomposition_type), intent(in) :: decomp
+    type(decomposition_type(num_ranks=*)), intent(in) :: decomp
     integer, intent(in), optional :: dim
     character(len=*), intent(in), optional :: opt
     integer :: ret
@@ -107,32 +87,32 @@ interface
 
   !> The `shape` function for decomposition_type
   pure module function get_shape(decomp, opt) result(ret)
-    class(decomposition_type), intent(in) :: decomp
+    type(decomposition_type(num_ranks=*)), intent(in) :: decomp
     character(len=*), intent(in), optional :: opt
     integer, allocatable :: ret(:)
   end function get_shape
 
   !> Get base index
   pure module function base_index(decomp) result(ret)
-    class(decomposition_type), intent(in) :: decomp
+    type(decomposition_type(num_ranks=*)), intent(in) :: decomp
     integer, allocatable :: ret(:)
   end function base_index
 
   !> Get remainder
   pure module function remainder(decomp) result(ret)
-    class(decomposition_type), intent(in) :: decomp
+    type(decomposition_type(num_ranks=*)), intent(in) :: decomp
     integer, allocatable :: ret(:)
   end function remainder
 
   !> Get number of processors
   pure module function get_coshape(decomp) result(ret)
-    class(decomposition_type), intent(in) :: decomp
+    type(decomposition_type(num_ranks=*)), intent(in) :: decomp
     integer, allocatable :: ret(:)
   end function get_coshape
 
   !> Get co_index
   pure module function get_thisimage(decomp, dim) result(ret)
-    class(decomposition_type), intent(in) :: decomp
+    type(decomposition_type(num_ranks=*)), intent(in) :: decomp
     integer, intent(in), optional :: dim
     integer :: ret
   end function get_thisimage
