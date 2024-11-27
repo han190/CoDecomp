@@ -32,21 +32,17 @@ module subroutine write_formatted(dtv, unit, iotype, v_list, iostat, iomsg)
   character(len=*), intent(inout) :: iomsg
   character(len=:), allocatable :: write_format
   integer, parameter :: num_comps = 7
-  character(len=20) :: component_names(num_comps)
-  integer, allocatable :: components(:,:)
-  integer :: num_ranks, i, i_start, i_end
+  character :: component_names(num_comps)
+  integer :: components(dtv%rank, num_comps), i, i_start, i_end
 
-  num_ranks = dtv%rank
-  write_format = "(a, ':', "//int2str(num_ranks)//"(i0, ','), tl1, ';')"
-
-  component_names = [character(len=20) :: "N", "P", "M", "R", "U", "A", "K"]
+  write_format = "(a, ':', "//int2str(dtv%rank)//"(i0, ','), tl1, ';')"
+  component_names = ["N", "P", "M", "R", "U", "A", "K"]
   components = reshape([dtv%global_size, dtv%num_procs, dtv%local_size_max, &
     & dtv%remainder, dtv%local_size, dtv%co_index, dtv%base_index], &
-    & [num_ranks, num_comps])
+    & [dtv%rank, num_comps])
 
   iostat = 0
-  write (unit, "(a, 1x)") "[DECOMP"
-
+  write (unit, "(a, '::')") "(DECOMP"
   select case (trim(iotype))
   case ("LISTDIRECTED")
     do i = 5, 7
@@ -65,6 +61,7 @@ module subroutine write_formatted(dtv, unit, iotype, v_list, iostat, iomsg)
       i_start = max(v_list(1), 1)
       i_end = min(v_list(size(v_list)), 7)
     case default
+      iostat = -2
       error stop "Invalid size of v_list."
     end select
 
@@ -73,9 +70,10 @@ module subroutine write_formatted(dtv, unit, iotype, v_list, iostat, iomsg)
         & trim(component_names(i)), components(:, i)
     end do
   case default
+    iostat = -1
     error stop "[write_formatted] Invalid format."
   end select
-  write (unit, "(tl1, a)", iostat=iostat) "]"
+  write (unit, "(tl1, a)", iostat=iostat) ")"
 end subroutine write_formatted
 
 end submodule submodule_io

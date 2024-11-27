@@ -8,16 +8,17 @@ program main
   integer :: i
 
   if (num_images() < 2) error stop "At least 2 images required."
-  num_tasks = [48, 32]
+  num_tasks = [47, 47]
 
   do i = 1, 2
-    num_procs = [i, num_images()/i]
+    num_procs = [num_images()/i, i]
     if (this_image() == 1) print "(a, *(i0, 1x))", "num_procs=", num_procs
     sync all
 
     decomp = decompose(num_tasks, num_procs)
     critical
-      print "(dt)", decomp
+      print "(dt(1,7))", decomp
+      print "(a, '=', i0)", "this_image", this_image(decomp)
     end critical
     sync all
   end do
@@ -27,6 +28,7 @@ program main
   sync all
   critical
     print "(dt)", decomp
+    print "(a, '=', i0)", "this_image", this_image(decomp)
   end critical
 
 end program main
