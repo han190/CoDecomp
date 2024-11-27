@@ -3,17 +3,30 @@ program main
   use, non_intrinsic :: module_decomposition
   implicit none
 
-  type(decomposition_type(num_ranks=:)), allocatable :: decomp
+  type(decomposition(rank=:)), allocatable :: decomp
   integer, dimension(2) :: num_tasks, num_procs
+  integer :: i
 
   if (num_images() < 2) error stop "At least 2 images required."
   num_tasks = [48, 32]
-  num_procs = [2, num_images()/2]
-  decomp = decompose(num_tasks, num_procs)
 
-  critical
-    print *, decomp
-  end critical
+  do i = 1, 2
+    num_procs = [i, num_images()/i]
+    if (this_image() == 1) print "(a, *(i0, 1x))", "num_procs=", num_procs
+    sync all
+
+    decomp = decompose(num_tasks, num_procs)
+    critical
+      print "(dt)", decomp
+    end critical
+    sync all
+  end do
+
+  decomp = decompose([49], [num_images()])
+  if (this_image() == 1) print "(a, *(i0, 1x))", "num_procs=", 49
   sync all
+  critical
+    print "(dt)", decomp
+  end critical
 
 end program main

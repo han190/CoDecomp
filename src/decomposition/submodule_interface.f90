@@ -4,7 +4,7 @@ contains
 
 !> The "size" function for decomposition_type
 pure module function get_size(decomp, dim, opt) result(ret)
-  type(decomposition_type(num_ranks=*)), intent(in) :: decomp
+  type(decomposition(rank=*)), intent(in) :: decomp
   integer, intent(in), optional :: dim
   character(len=*), intent(in), optional :: opt
   integer :: ret
@@ -13,7 +13,7 @@ pure module function get_size(decomp, dim, opt) result(ret)
 
   dim_ = optional_argument(dim, 0)
   opt_ = optional_argument(opt, "local")
-  if (dim_ < 0 .or. dim_ > decomp%num_ranks) &
+  if (dim_ < 0 .or. dim_ > decomp%rank) &
     & error stop "[get_size] Invalid dim."
   select case (trim(opt_))
   case ("local")
@@ -33,7 +33,7 @@ end function get_size
 
 !> The `shape` function for decomposition_type
 pure module function get_shape(decomp, opt) result(ret)
-  type(decomposition_type(num_ranks=*)), intent(in) :: decomp
+  type(decomposition(rank=*)), intent(in) :: decomp
   character(len=*), intent(in), optional :: opt
   integer, allocatable :: ret(:)
   character(len=:), allocatable :: opt_
@@ -53,7 +53,7 @@ end function get_shape
 
 !> Get base index
 pure module function base_index(decomp) result(ret)
-  type(decomposition_type(num_ranks=*)), intent(in) :: decomp
+  type(decomposition(rank=*)), intent(in) :: decomp
   integer, allocatable :: ret(:)
 
   ret = decomp%base_index
@@ -61,7 +61,7 @@ end function base_index
 
 !> Get remainder
 pure module function remainder(decomp) result(ret)
-  type(decomposition_type(num_ranks=*)), intent(in) :: decomp
+  type(decomposition(rank=*)), intent(in) :: decomp
   integer, allocatable :: ret(:)
 
   ret = decomp%remainder
@@ -69,7 +69,7 @@ end function remainder
 
 !> Get number of processors
 pure module function get_coshape(decomp) result(ret)
-  type(decomposition_type(num_ranks=*)), intent(in) :: decomp
+  type(decomposition(rank=*)), intent(in) :: decomp
   integer, allocatable :: ret(:)
 
   ret = decomp%num_procs
@@ -77,13 +77,13 @@ end function get_coshape
 
 !> Get co_index
 pure module function get_thisimage(decomp, dim) result(ret)
-  type(decomposition_type(num_ranks=*)), intent(in) :: decomp
+  type(decomposition(rank=*)), intent(in) :: decomp
   integer, intent(in), optional :: dim
   integer :: ret
   integer :: dim_
 
   dim_ = optional_argument(dim, 0)
-  if (dim_ < 0 .or. dim_ > decomp%num_ranks) &
+  if (dim_ < 0 .or. dim_ > decomp%rank) &
     & error stop "[get_thisimage] Invalid dim."
   select case (dim_)
   case (0)

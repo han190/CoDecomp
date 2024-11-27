@@ -72,7 +72,7 @@ end function get_baseindex
 !> Decomposition type constructor
 module function decompose_manual(num_tasks, num_procs) result(decomp)
   integer, intent(in) :: num_tasks(:), num_procs(:)
-  type(decomposition_type(num_ranks=:)), allocatable :: decomp
+  type(decomposition(rank=:)), allocatable :: decomp
   integer, dimension(size(num_tasks)) :: m, r, alpha, m_alpha, k0_alpha
   integer :: n
 
@@ -83,10 +83,10 @@ module function decompose_manual(num_tasks, num_procs) result(decomp)
   
   !> Allocate decomp
   if (.not. allocated(decomp)) then
-    allocate (decomposition_type(num_ranks=n) :: decomp)
-  else if (decomp%num_ranks /= n) then
+    allocate (decomposition(rank=n) :: decomp)
+  else if (decomp%rank /= n) then
     deallocate (decomp)
-    allocate (decomposition_type(num_ranks=n) :: decomp)
+    allocate (decomposition(rank=n) :: decomp)
   end if
   
   m = get_maxlocalsize(num_tasks, num_procs)
@@ -106,12 +106,12 @@ end function decompose_manual
 
 !> Compute local index from global index.
 module function get_location(decomp, global_index, recompute) result(local_index)
-  type(decomposition_type(num_ranks=*)), intent(inout) :: decomp
+  type(decomposition(rank=*)), intent(inout) :: decomp
   integer, intent(in) :: global_index(:)
   logical, intent(in), optional :: recompute
   integer, allocatable :: local_index(:)
 
-  if (size(global_index) /= decomp%num_ranks) error stop &
+  if (size(global_index) /= decomp%rank) error stop &
     & "[get_location] Invalid global index."
   if (present(recompute)) then
     if (.not. recompute) then
